@@ -1,0 +1,6 @@
+{
+  "description": "Tools available to the security subagent (read-heavy, minimal write)",
+  "prefer": ["read_file", "grep", "codebase_search"],
+  "allowWrite": false,
+  "globs": ["**/*"]
+}

@@ -1,0 +1,6 @@
+{
+  "description": "Tools available to the frontend subagent",
+  "prefer": ["read_file", "grep", "codebase_search", "search_replace", "write"],
+  "avoid": ["run_terminal_cmd"],
+  "globs": ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.css", "**/*.scss"]
+}
