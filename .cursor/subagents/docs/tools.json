@@ -1,6 +1,0 @@
-{
-  "description": "Tools available to the docs subagent",
-  "prefer": ["read_file", "grep", "codebase_search", "write", "search_replace"],
-  "avoid": ["run_terminal_cmd"],
-  "globs": ["**/*.md", "**/docs/**", "**/openapi.*"]
-}

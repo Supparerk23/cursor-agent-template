@@ -1,5 +1,0 @@
-{
-  "description": "Tools available to the devops subagent",
-  "prefer": ["read_file", "grep", "codebase_search", "search_replace", "write", "run_terminal_cmd"],
-  "globs": [".github/**", "Dockerfile*", "docker-compose*.yml", "scripts/**", ".env.example"]
-}
