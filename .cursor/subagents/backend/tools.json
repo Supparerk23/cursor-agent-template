@@ -1,6 +1,0 @@
-{
-  "description": "Tools available to the backend subagent",
-  "prefer": ["read_file", "grep", "codebase_search", "search_replace", "write"],
-  "avoid": ["run_terminal_cmd"],
-  "globs": ["**/api/**", "**/services/**", "**/domain/**", "**/repositories/**", "**/models/**", "**/db/**"]
-}
