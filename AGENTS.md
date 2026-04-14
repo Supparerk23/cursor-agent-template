@@ -1,115 +1,143 @@
-# Agents, Sub-Agents, and Responsibilities
+# AI Engineering Team Structure and Orchestration
 
-This repository defines a reusable **Cursor AI Agent + Sub-Agent architecture** for software engineering projects.
+This repository defines a reusable **AI engineering team** built from Cursor agents and sub-agents.
 
-- **Agents** handle large, reasoning-heavy tasks: planning, orchestration, and calling sub-agents.
-- **Sub-agents** handle repetitive, deterministic, narrow-scope work and return structured outputs.
+- **Agents** act like senior engineers: they plan, orchestrate, and delegate.
+- **Sub-agents** act like specialized tools: they execute deterministic, narrow-scope tasks with structured inputs and outputs.
+- **Debug and observability** are first-class requirements: agent workflows must be inspectable, evidence-backed, and traceable from input to output.
 
-Agents must never implement specialized logic directly if a corresponding sub-agent exists. Sub-agents must not modify unrelated files.
+Agents must **only orchestrate**. When a sub-agent exists, the agent must not implement that specialized logic directly.
 
-## Directory structure
-
-```bash
-.cursor/
-├── agents/
-│   ├── backend-engineer.md
-│   ├── frontend-engineer.md
-│   ├── architect.md
-│   ├── code-reviewer.md
-│   ├── bug-investigator.md
-│   ├── security-auditor.md
-│   ├── refactor-agent.md
-│   ├── migration-agent.md
-│   ├── performance-optimizer.md
-│   ├── dependency-upgrader.md
-│   └── test-writer.md
-├── subagents/
-│   ├── test-writer.md
-│   ├── security-reviewer.md
-│   ├── refactor-agent.md
-│   ├── doc-generator.md
-│   └── migration-agent.md
-└── global.json
-```
-
-Each file in `.cursor/agents/` describes an **orchestrating agent**.  
-Each file in `.cursor/subagents/` describes a **deterministic executor** with explicit schemas.
+Sub-agents must **only execute deterministically** within a declared scope and must not modify unrelated files.
 
 ---
 
-## 3-layer agent architecture
+## 1. Team structure (who does what)
 
-### Strategic Layer
+### Strategic Layer (architecture and direction)
 
 - **architect**
-  - **Role**: System-level architecture and planning.
-  - **Responsibilities**: Understand initiatives, define target architecture, break work into streams, choose which execution and quality agents to involve.
-  - **When to use**: New major features, large refactors, cross-cutting concerns.
-  - **Subagents called (via other agents)**: Primarily orchestrates other agents, may call `doc-generator` and `migration-agent` (sub-agent) for ADRs and migration artifacts.
+  - **Role**: Principal engineer / architect.
+  - **Scope**: Requirements, system design, boundaries, and workstream planning.
+  - **Output**: Architecture plans, work breakdown, rollout strategies.
 
-### Execution Layer
+### Execution Layer (feature and change delivery)
 
 - **backend-engineer**
-  - **Role**: Backend implementation orchestrator.
-  - **Responsibilities**: Plan backend API and business-logic changes, coordinate tests, refactors, migrations, and docs.
-  - **When to use**: Backend features, bug fixes, and migrations.
-  - **Subagents called**: `test-writer`, `refactor-agent`, `doc-generator`, `migration-agent`, `security-reviewer`.
+  - **Role**: Backend feature and bugfix orchestrator.
+  - **Scope**: APIs, services, jobs, data access, backend migrations.
 
 - **frontend-engineer**
-  - **Role**: Frontend/UI implementation orchestrator.
-  - **Responsibilities**: Plan component, state, and layout changes; ensure a11y and performance; coordinate tests and docs.
-  - **When to use**: UI features, layout/state changes, frontend bug fixes.
-  - **Subagents called**: `test-writer`, `refactor-agent`, `doc-generator`, `security-reviewer` (for sensitive flows).
+  - **Role**: Frontend/UI feature and bugfix orchestrator.
+  - **Scope**: Components, state, routing, accessibility, UX flows.
 
 - **migration-agent**
-  - **Role**: Migration orchestration agent.
-  - **Responsibilities**: Plan schema/config/data migrations, define phases, coordinate scripts, tests, and runbooks.
-  - **When to use**: DB/schema changes, API version migrations, framework upgrades requiring migrations.
-  - **Subagents called**: `migration-agent`, `test-writer`, `doc-generator`, `security-reviewer`.
+  - **Role**: Schema/config/data migration orchestrator.
+  - **Scope**: DB schemas, data migrations, config changes and sequencing.
 
 - **dependency-upgrader**
-  - **Role**: Dependency upgrade orchestration agent.
-  - **Responsibilities**: Plan dependency upgrades, batch and order changes, coordinate migrations, tests, and security checks.
-  - **When to use**: Library/runtime/tool upgrades or periodic dependency hygiene.
-  - **Subagents called**: `migration-agent`, `test-writer`, `security-reviewer`, `doc-generator`.
+  - **Role**: Dependency and runtime upgrade orchestrator.
+  - **Scope**: Libraries, frameworks, tooling versions and their impacts.
 
-### Quality Layer
+- **refactor-agent**
+ - **Role**: Refactor orchestration owner.
+ - **Scope**: Multi-file maintainability refactors, cleanup sequencing, and behavior-preserving restructuring.
+
+### Quality Layer (review, safety, and non-functional requirements)
 
 - **test-writer** (agent)
-  - **Role**: Test strategy and orchestration agent.
-  - **Responsibilities**: Decide coverage strategy and test types, coordinate deterministic test generation and documentation.
-  - **When to use**: After features or fixes, when raising coverage, or as a gate in reviews/migrations.
-  - **Subagents called**: `test-writer`, `doc-generator`.
+  - **Role**: Test strategy owner.
+  - **Scope**: Coverage planning, test types, and test-suite organization.
 
 - **code-reviewer**
-  - **Role**: Structured code review orchestrator.
-  - **Responsibilities**: Analyze diffs, coordinate security checks, test suggestions, localized refactors, and doc updates.
-  - **When to use**: Reviewing pull requests or large diffs before merge.
-  - **Subagents called**: `test-writer`, `security-reviewer`, `refactor-agent`, `doc-generator`.
+  - **Role**: Code review lead.
+  - **Scope**: Correctness, maintainability, style, and architecture adherence.
 
 - **security-auditor**
-  - **Role**: Security assessment orchestrator.
-  - **Responsibilities**: Scope security reviews, coordinate checklist-based security analysis, security tests, and security docs.
-  - **When to use**: Auth/PII features, dependency or infra changes with security impact.
-  - **Subagents called**: `security-reviewer`, `test-writer`, `doc-generator`.
+  - **Role**: Security lead.
+  - **Scope**: Threat modeling, auth/crypto review, and security posture checks.
 
 - **bug-investigator**
-  - **Role**: Bug investigation orchestrator.
-  - **Responsibilities**: Turn bug reports into hypotheses, coordinate regression tests, refactors, and incident documentation.
-  - **When to use**: Bugs, flaky tests, production incidents.
-  - **Subagents called**: `test-writer`, `refactor-agent`, `doc-generator`.
+  - **Role**: Incident and bug triage lead.
+  - **Scope**: Reproduction, root-cause analysis, and fix recommendations.
 
 - **performance-optimizer**
-  - **Role**: Performance optimization orchestrator.
-  - **Responsibilities**: Analyze performance metrics, identify hotspots, coordinate performance-focused refactors, benchmarks, and docs.
-  - **When to use**: Slow endpoints, heavy UIs, performance regressions.
-  - **Subagents called**: `refactor-agent`, `test-writer`, `doc-generator`, `security-reviewer` (if perf work touches sensitive paths).
+  - **Role**: Performance lead.
+  - **Scope**: Profiling, hotspot analysis, and performance improvement plans.
 
 ---
 
-## Sub-agent overview
+## 2. Orchestration rules
 
-Each sub-agent file in `.cursor/subagents/` follows the same strict schema:
+These rules apply to **all agents**:
+
+- **No direct specialized work**: if a sub-agent exists for a task, the agent:
+  - Describes the task.
+  - Calls the appropriate sub-agent with **explicit input_schema fields**.
+  - Consumes only the sub-agent’s **structured output_schema**.
+- **No cross-scope edits**: an agent must only propose changes in the scope it was given.
+- **Deterministic pipelines**:
+  - Agents must call sub-agents in clear, ordered steps.
+  - Dependencies between steps must be explicit (for example, “generate tests after refactor output is available”).
+- **Structured outputs**:
+  - Final agent outputs should be structured objects (plans, packages, reviews), not free-form prose alone.
+- **Evidence discipline**:
+  - Agents must distinguish confirmed facts from assumptions.
+  - If key inputs are missing, agents must surface the gap explicitly instead of inventing details.
+- **Traceability**:
+  - Agents must preserve a clear link from request inputs to execution plans, sub-agent calls, findings, and final outputs.
+  - Major conclusions should be attributable to either user-provided inputs or structured sub-agent outputs.
+- **Observability**:
+  - Agents must expose why they were selected, what execution plan they are following, which sub-agents were called, which input schemas were passed, and which outputs are expected or received.
+- **Fail-closed behavior**:
+  - When critical information is missing or contradictory, agents should report uncertainty and constrain recommendations rather than hallucinating a complete answer.
+- **Separation of concerns**:
+  - Planning and orchestration live in agents.
+  - Execution (tests, refactors, docs, migrations, security checks) live in sub-agents.
+
+---
+
+## 3. Agent responsibilities (summary)
+
+| Agent                  | Layer       | Primary responsibilities                                                                                   |
+|------------------------|------------|------------------------------------------------------------------------------------------------------------|
+| `architect`            | Strategic   | Define target architecture, boundaries, workstreams, and rollout plans.                                   |
+| `backend-engineer`     | Execution   | Plan backend changes; orchestrate tests, refactors, migrations, docs, and security checks.                |
+| `frontend-engineer`    | Execution   | Plan frontend/UI changes; orchestrate component refactors, tests, docs, and security checks.             |
+| `migration-agent`      | Execution   | Plan migrations; orchestrate migration scripts, rollback, validation tests, and runbooks.                 |
+| `dependency-upgrader`  | Execution   | Plan dependency upgrades; orchestrate necessary migrations, tests, security review, and docs.             |
+| `refactor-agent`       | Execution   | Plan maintainability refactors; orchestrate localized refactors, regression tests, and refactor docs.     |
+| `test-writer` (agent)  | Quality     | Define coverage strategy and test types; orchestrate deterministic test generation and test docs.         |
+| `code-reviewer`        | Quality     | Review diffs; orchestrate security review, test suggestions, localized refactors, and docs.              |
+| `security-auditor`     | Quality     | Plan and scope security reviews; orchestrate security checks, security tests, and security documentation. |
+| `bug-investigator`     | Quality     | Analyze bugs; orchestrate regression tests, refactors, and incident documentation.                        |
+| `performance-optimizer`| Quality     | Analyze performance; orchestrate performance refactors, benchmarks, and performance docs.                 |
+
+Each agent file in `.cursor/agents/` expands these into:
+
+- `role`
+- `responsibilities`
+- `when_to_use`
+- `subagents_called`
+- `workflow`
+- `debug_capabilities`
+- `architecture_constraints`
+
+All agent files should also encode the following runtime observability contract:
+
+- `agent selection reason`
+- `execution plan`
+- `sub-agent calls`
+- `input schemas passed to sub-agents`
+- `expected outputs`
+- `evidence vs assumptions`
+- `traceability back to inputs or sub-agent outputs`
+
+---
+
+## 4. Sub-agent usage (how execution happens)
+
+Sub-agents live in `.cursor/subagents/` and follow a shared shape:
 
 ```markdown
 subagent: <name>
@@ -135,49 +163,90 @@ constraints:
   - <hard constraint on scope / side effects>
 ```
 
-The concrete definitions live in:
+Concrete sub-agents:
 
-- `subagents/test-writer.md`
-- `subagents/security-reviewer.md`
-- `subagents/refactor-agent.md`
-- `subagents/doc-generator.md`
-- `subagents/migration-agent.md`
+- **test-writer** (`subagents/test-writer.md`)
+  - **Used by**: `backend-engineer`, `frontend-engineer`, `migration-agent`, `dependency-upgrader`, `test-writer` (agent), `code-reviewer`, `security-auditor`, `bug-investigator`, `performance-optimizer`.
+  - **Typical call**: provide `language`, `framework`, `target_files`, `behavior_description`, `coverage_constraints`.
+  - **Output**: `test_code`, `coverage_target`, `edge_cases`, `execution_instructions`.
 
-At a high level:
+- **security-reviewer** (`subagents/security-reviewer.md`)
+  - **Used by**: `backend-engineer`, `frontend-engineer`, `migration-agent`, `dependency-upgrader`, `code-reviewer`, `security-auditor`, `performance-optimizer`.
+  - **Typical call**: provide `code_paths` or `code_snippets`, `threat_context`, `data_sensitivity`, optional `dependency_list`, `focus_areas`.
+  - **Output**: `findings`, `risk_summary`, `verification_steps`.
 
-- **test-writer**
-  - **Role**: Generate deterministic unit/integration/end-to-end tests for specific files and behaviors.
-  - **Key constraints**: Only outputs test code and execution instructions; never modifies production code; scoped strictly to provided targets.
+- **refactor-agent** (`subagents/refactor-agent.md`)
+  - **Used by**: `backend-engineer`, `frontend-engineer`, `refactor-agent` (agent), `code-reviewer`, `bug-investigator`, `performance-optimizer`.
+  - **Typical call**: provide `current_code`, `refactor_goal`, `file_path`, `constraints`, optional `context_snippets`.
+  - **Output**: `refactored_code`, `change_summary`, `risk_notes`, `invariants`.
 
-- **security-reviewer**
-  - **Role**: Run a deterministic security checklist over specific code/config, producing evidence-backed findings and recommendations.
-  - **Key constraints**: Only analyzes provided paths/snippets; no speculative vulnerabilities; no edits to code or config.
+- **doc-generator** (`subagents/doc-generator.md`)
+  - **Used by**: almost all agents when they need docs (for example, `architect`, `backend-engineer`, `frontend-engineer`, `migration-agent`, `dependency-upgrader`, `test-writer`, `code-reviewer`, `security-auditor`, `bug-investigator`, `performance-optimizer`).
+  - **Typical call**: provide `code_or_diff`, `documentation_type`, `audience`, optional `constraints` and `file_path`.
+  - **Output**: `documentation_markdown`, `sections`, `assumptions`.
 
-- **refactor-agent**
-  - **Role**: Apply localized, behavior-preserving refactors to a single file/snippet under explicit constraints.
-  - **Key constraints**: Must preserve behavior when requested; must not touch files outside the declared file; no cross-cutting architecture changes.
+- **migration-agent** (`subagents/migration-agent.md`)
+  - **Used by**: `migration-agent` (agent), `dependency-upgrader`, `architect` (indirectly).
+  - **Typical call**: provide `from_version`, `to_version`, `current_schema_or_config`, `target_state_description`, optional `environment_constraints`, `scope_files`.
+  - **Output**: `migration_steps`, `migration_scripts`, `rollback_plan`, `verification_checks`.
 
-- **doc-generator**
-  - **Role**: Generate markdown documentation (API docs, ADRs, readme sections, test plans) from provided code or diffs.
-  - **Key constraints**: Only emits markdown; does not modify code; content must reflect observable code/diff, not speculation.
+All sub-agents:
 
-- **migration-agent**
-  - **Role**: Generate ordered migration steps, scripts, rollback plans, and verification checks from current/target schema or config.
-  - **Key constraints**: Changes derived solely from declared schema/config differences; scope-limited to migration files; no script execution.
+- Must obey their own `rules` and `constraints`.
+- Must never operate outside the supplied scope (for example, `scope_files`, `file_path`, `code_paths`).
+- Must return fully structured outputs with no hidden behavior.
 
 ---
 
-## Behavior rules
+## 5. Routing layer (how tasks reach the right agent)
 
-- **Agents**:
-  - Orchestrate tasks, not low-level execution.
-  - Call sub-agents with explicit, typed inputs.
-  - Combine sub-agent outputs into a final structured result (plans, packages, reviews).
+The **routing layer** decides which **agent** to invoke first, based on the task description, and that agent then routes to the correct **sub-agents**.
 
-- **Sub-agents**:
-  - Operate deterministically for the same inputs.
-  - Return structured outputs matching their `output_schema`.
-  - Avoid speculative reasoning and never touch unrelated files or concerns.
+### High-level routing
 
-See the individual files under `.cursor/agents/` and `.cursor/subagents/` for full, implementation-ready definitions.
+- **Architecture / big-picture design**
+  - Route to: `architect`.
+- **Backend feature, bugfix, or endpoint work**
+  - Route to: `backend-engineer`.
+- **Frontend/UI feature or bugfix**
+  - Route to: `frontend-engineer`.
+- **Schema/data/config migration**
+  - Route to: `migration-agent`.
+- **Dependency or runtime upgrade**
+  - Route to: `dependency-upgrader`.
+- **Maintainability refactor or multi-file cleanup**
+ - Route to: `refactor-agent`.
+- **Test strategy or coverage increase**
+  - Route to: `test-writer` (agent).
+- **Code review of a diff or PR**
+  - Route to: `code-reviewer`.
+- **Security review**
+  - Route to: `security-auditor`.
+- **Bug / incident investigation**
+  - Route to: `bug-investigator`.
+- **Performance issue**
+  - Route to: `performance-optimizer`.
+
+### Intra-agent routing (agent → sub-agents)
+
+Within an agent:
+
+- The agent:
+  - Parses the task into smaller, deterministic sub-tasks.
+  - For each sub-task, chooses a sub-agent based on:
+    - **Type of work** (tests, refactor, docs, migration, security).
+    - **Scope** (files, functions, schemas).
+  - Calls the sub-agent with a **fully-populated input_schema** object.
+- The agent then:
+  - Collects all `output_schema` objects from sub-agents.
+  - Validates that outputs are consistent with the plan and scope.
+  - Validates that conclusions remain traceable to explicit inputs or sub-agent outputs.
+  - Produces a final **structured output** for the user or next step in the pipeline.
+
+This routing pattern ensures:
+
+- Clear ownership: strategic vs execution vs quality.
+- Deterministic execution: all specialized work goes through sub-agents with explicit schemas.
+- Composability: new agents or sub-agents can be added without breaking existing ones, as long as inputs and outputs stay structured.
+
 

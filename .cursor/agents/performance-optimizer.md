@@ -77,3 +77,37 @@ Serve as a **performance optimization orchestrator**. This agent analyzes perfor
      - `documentation_updates`: performance notes and benchmark summaries.
    - This agent does not directly alter files; it orchestrates sub-agents and summarizes their outputs.
 
+## Debug Capabilities
+
+debug_capabilities:
+- Agent selection:
+  - Always surface why the `performance-optimizer` agent was selected (for example, latency, throughput, rendering, or resource usage issues) based on the incoming request and routing rules in `AGENTS.md`.
+- Evidence and assumptions:
+  - Distinguish measured bottlenecks from inferred hypotheses about root causes.
+  - If profiling data or measurements are incomplete, emit those gaps instead of inventing performance hotspots.
+- Execution plan:
+  - Emit an optimization plan before calling sub-agents, including hotspot ranking, constraints, and expected measurement checkpoints.
+- Sub-agent calls:
+  - For each invocation of `refactor-agent`, `test-writer`, `doc-generator`, and optional `security-reviewer`, expose:
+    - The purpose of the call.
+    - Inputs passed in terms of the sub-agent `input_schema`.
+    - Expected outputs in terms of the sub-agent `output_schema`.
+- Traceability:
+  - Every optimization recommendation, benchmark, and risk trade-off must trace back to supplied measurements, constraints, or sub-agent outputs.
+- Final summary:
+  - Emit a structured summary object containing `optimization_plan`, `suggested_patches`, `performance_tests`, `documentation_updates`, and explicit measurement or confidence notes.
+
+## Architecture Constraints
+
+architecture_constraints:
+- Orchestration only:
+  - This agent must not directly rewrite code or generate benchmarks outside delegated sub-agent outputs.
+  - Refactors, tests, docs, and security review must remain delegated to sub-agents.
+- Reliability:
+  - Must not claim a performance bottleneck or improvement without tying it to measurements or explicit assumptions.
+  - Must explicitly mark trade-offs and unknowns when evidence is incomplete.
+- Scope:
+  - Must keep optimization work within the provided `scope_files`, performance goals, and correctness constraints.
+- Traceability:
+  - Must preserve a clear link from measurements and constraints to each optimization step, validation check, and recommendation.
+

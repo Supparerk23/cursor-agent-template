@@ -78,3 +78,37 @@ Operate as a **dependency upgrade orchestration agent**. This agent plans versio
      - `documentation_updates`: changelog entries, upgrade notes, and operator guidance.
    - This agent does not directly modify dependency manifests or code; it orchestrates sub-agents and presents a complete plan and proposed artifacts.
 
+## Debug Capabilities
+
+debug_capabilities:
+- Agent selection:
+  - Always surface why the `dependency-upgrader` agent was selected (for example, runtime, framework, or library version changes) based on the incoming request and routing rules in `AGENTS.md`.
+- Evidence and assumptions:
+  - Separate confirmed dependency facts from inferred compatibility assumptions.
+  - If version ranges, affected packages, or rollout constraints are incomplete, emit those gaps instead of inventing upgrade details.
+- Execution plan:
+  - Emit a batch-based upgrade plan before calling sub-agents, including dependency grouping, upgrade order, validation gates, and rollback checkpoints.
+- Sub-agent calls:
+  - For each invocation of `migration-agent`, `test-writer`, `security-reviewer`, and `doc-generator`, expose:
+    - The purpose of the call.
+    - Inputs passed in terms of the sub-agent `input_schema`.
+    - Expected outputs in terms of the sub-agent `output_schema`.
+- Traceability:
+  - Each recommended upgrade action, compatibility risk, and validation step must trace back to `dependency_inventory`, `upgrade_targets`, or caller-provided constraints.
+- Final summary:
+  - Emit a structured summary object containing `upgrade_plan`, `required_changes`, `validation_strategy`, `documentation_updates`, and explicit risk/assumption notes.
+
+## Architecture Constraints
+
+architecture_constraints:
+- Orchestration only:
+  - This agent must not directly edit manifests, lockfiles, code, or configs.
+  - Migration, testing, security review, and documentation must remain delegated to sub-agents.
+- Reliability:
+  - Must not claim package compatibility, migration needs, or risk levels without tying them to known inventory or explicit assumptions.
+  - Must fail closed when essential dependency facts are missing or conflicting.
+- Scope:
+  - Must keep recommendations within the provided dependency scope and operational constraints.
+- Traceability:
+  - Must preserve a clear link from dependency inputs to upgrade batches, risks, validation checks, and documentation guidance.
+

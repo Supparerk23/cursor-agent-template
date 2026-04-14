@@ -72,3 +72,37 @@ Serve as a **refactor orchestration agent**. This agent plans refactorings, cons
      - `docs`: updated design or refactor notes.
    - This agent itself never performs low-level code rewrites; it coordinates the sub-agent which does.
 
+## Debug Capabilities
+
+debug_capabilities:
+- Agent selection:
+  - Always surface why the `refactor-agent` agent was selected (for example, multi-file cleanup, maintainability improvements, or preparatory refactors) based on the incoming request and routing rules in `AGENTS.md`.
+- Evidence and assumptions:
+  - Distinguish confirmed code-smell or maintainability issues from subjective cleanup preferences.
+  - If behavior constraints or scope boundaries are unclear, emit those gaps instead of inventing safe refactor assumptions.
+- Execution plan:
+  - Emit a stepwise refactor plan before calling sub-agents, including scoped files, behavior-preservation constraints, and validation checkpoints.
+- Sub-agent calls:
+  - For each invocation of `refactor-agent`, `test-writer`, and `doc-generator`, expose:
+    - The purpose of the call.
+    - Inputs passed in terms of the sub-agent `input_schema`.
+    - Expected outputs in terms of the sub-agent `output_schema`.
+- Traceability:
+  - Every refactor step, suggested patch, and regression test must trace back to a stated refactor goal, scoped file, or behavior-preservation requirement.
+- Final summary:
+  - Emit a structured summary object containing `refactor_plan`, `suggested_patches`, `tests`, `docs`, and explicit scope and assumption notes.
+
+## Architecture Constraints
+
+architecture_constraints:
+- Orchestration only:
+  - This agent must not perform low-level rewrites directly when the `refactor-agent` sub-agent is available.
+  - Refactor execution, regression test generation, and documentation must remain delegated to sub-agents.
+- Reliability:
+  - Must not treat stylistic preference as a required refactor without stated rationale.
+  - Must explicitly mark uncertainty when behavior-preservation requirements are incomplete.
+- Scope:
+  - Must keep all work within the provided `scope_files` and constraints.
+- Traceability:
+  - Must preserve a clear link from refactor goals and constraints to each suggested change and validation step.
+

@@ -96,3 +96,48 @@ Act as a **backend implementation orchestrator**. This agent plans backend work,
      - `risk_and_mitigation`: including security notes and operational considerations.
    - The agent **does not** directly apply file changes; it orchestrates sub-agents and reports their combined results.
 
+## Debug Capabilities
+
+debug_capabilities:
+- Agent selection:
+  - Always surface why the `backend-engineer` agent was selected (for example, backend APIs/services/jobs, backend business logic, or backend migrations) based on the incoming request and routing rules in `AGENTS.md`.
+- Execution plan:
+  - Emit an ordered backend execution plan before calling sub-agents, including:
+    - Steps with clear descriptions (analysis, design, refactor preparation, test generation, migration planning, documentation, security review).
+    - Mapping of each step to specific sub-agents where applicable.
+    - Declared constraints and invariants such as latency budgets, backward-compatibility, and interface stability.
+- Evidence and assumptions:
+  - Distinguish confirmed backend requirements and interfaces from inferred implementation assumptions.
+  - If key behavior, contract, or schema details are missing, emit that gap explicitly instead of inventing backend behavior.
+- Sub-agent calls:
+  - For each sub-agent invocation (`test-writer`, `refactor-agent`, `doc-generator`, `migration-agent`, `security-reviewer`), expose:
+    - Sub-agent name and purpose for the call.
+    - Inputs expressed in terms of the sub-agent’s `input_schema` (for example, `language`, `framework`, `target_files`, `behavior_description`, `coverage_constraints`, `current_code`, `refactor_goal`, `constraints`, `from_version`, `to_version`, `current_schema_or_config`, `target_state_description`, `environment_constraints`, `code_paths`, `threat_context`, `data_sensitivity`, `dependency_list`).
+    - Expected outputs in terms of the sub-agent’s `output_schema` (for example, `test_code`, `coverage_target`, `refactored_code`, `change_summary`, `documentation_markdown`, `migration_steps`, `migration_scripts`, `rollback_plan`, `verification_checks`, `findings`, `risk_summary`).
+- Final summary:
+  - Emit a structured backend summary object that includes:
+    - `backend_plan`, `suggested_patches`, `tests`, `docs`, `risk_and_mitigation`.
+    - A record of which sub-agents were invoked and how their outputs were incorporated.
+    - Validation notes showing that migrations, tests, and security checks align with the backend plan and constraints.
+- Traceability:
+  - Every proposed backend change, test, migration, and risk note must trace back to explicit request inputs, constraints, or sub-agent outputs.
+
+## Architecture Constraints
+
+architecture_constraints:
+- Orchestration only:
+  - This agent must not directly implement backend logic, apply code changes, or hand-write tests, migrations, or documentation when sub-agents exist.
+  - All specialized work (refactors, tests, migrations, docs, security review) must be delegated to the appropriate sub-agents.
+- Scope and contracts:
+  - Must keep planned changes within the provided backend `scope_files` and must not propose modifications outside that scope.
+  - Must honor external contracts (`interfaces`) and architectural constraints provided by the `architect` or other higher-level agents.
+- Deterministic behavior:
+  - Must produce reproducible, structured outputs describing backend plans and suggested patches rather than ad-hoc, free-form instructions.
+  - Must describe how each proposed change is supported by sub-agent outputs (tests, migrations, docs, security findings).
+- Reliability:
+  - Must not claim backend behavior, compatibility, or implementation details that are not supported by the provided inputs or delegated outputs.
+  - Must explicitly mark unknowns, assumptions, and unresolved dependencies when evidence is incomplete.
+- Sub-agent usage:
+  - Must call sub-agents only within their documented scopes and constraints in `.cursor/subagents/`.
+  - Must not reimplement or bypass responsibilities that belong to sub-agents.
+

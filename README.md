@@ -1,77 +1,103 @@
 # cursor-agent-template
 
-Template for a **Cursor AI Agent + Sub-Agent architecture** that you can drop into any software engineering repository.
+A simple template for building a multi-agent Cursor setup inside any software project.
 
-- Agents handle large, reasoning-heavy tasks (planning, orchestration, coordination).
-- Sub-agents handle deterministic, narrow-scope execution with strict schemas.
+This repo separates work into two layers:
 
-See `AGENTS.md` for the full architecture and roles.
+- **Agents** plan and coordinate work.
+- **Sub-agents** do narrow, deterministic tasks with explicit inputs and outputs.
 
-## Structure
+If you want the full architecture and all rules, read `AGENTS.md`.
+
+## What is included
 
 ```bash
 .cursor/
-├── agents/                  # Orchestrating agents (strategic, execution, quality)
-│   ├── backend-engineer.md
-│   ├── frontend-engineer.md
-│   ├── architect.md
-│   ├── code-reviewer.md
-│   ├── bug-investigator.md
-│   ├── security-auditor.md
-│   ├── refactor-agent.md
-│   ├── migration-agent.md
-│   ├── performance-optimizer.md
-│   ├── dependency-upgrader.md
-│   └── test-writer.md
-├── subagents/               # Deterministic executors with explicit schemas
-│   ├── test-writer.md
-│   ├── security-reviewer.md
-│   ├── refactor-agent.md
-│   ├── doc-generator.md
-│   └── migration-agent.md
-└── global.json              # (Optional) global discovery and configuration
+├── agents/       # High-level agents
+├── subagents/    # Specialized executors
+└── global.json   # Optional Cursor config
 ```
 
-Each agent file describes:
+### Agents
 
-- **role**: what kind of work it orchestrates.
-- **responsibilities**: what it plans and coordinates.
-- **when_to_use**: clear triggers for choosing this agent.
-- **subagents_called**: which sub-agents it uses.
-- **workflow**: how it plans, calls sub-agents, and aggregates results.
+Agents are the top-level decision makers. They choose the right workflow, call sub-agents, and combine the results.
 
-Each sub-agent file defines:
+Examples:
 
-- **subagent** and **role**.
-- **input_schema** and **output_schema** (explicit fields and types).
-- **rules** for deterministic behavior.
-- **constraints** that restrict scope and side effects.
+- `architect`
+- `backend-engineer`
+- `frontend-engineer`
+- `code-reviewer`
+- `security-auditor`
+- `bug-investigator`
+- `performance-optimizer`
 
-## Usage
+### Sub-agents
 
-- **Clone template and copy into a new project**:
+Sub-agents are smaller and more predictable. They are used for specific tasks like:
 
-  ```bash
-  # clone only the .cursor folder from the template repo
-  git clone --depth 1 --filter=blob:none --sparse git@github.com:Supparerk23/cursor-agent-template.git
-  cd cursor-agent-template
-  git sparse-checkout set .cursor
+- writing tests
+- reviewing security concerns
+- generating docs
+- planning migrations
+- producing localized refactors
 
-  # copy the .cursor config into your project
-  cp -r .cursor ../new-project/
-  ```
+## How it works
 
-- **After copying, typically only modify**:
-  - Individual agent files in `.cursor/agents/` if you want different orchestration rules for your project.
-  - Sub-agent files in `.cursor/subagents/` if you need to adjust schemas or constraints for your environment.
-  - Optionally, `.cursor/global.json` if you decide to use it for agent discovery or additional configuration.
+The rule of this template is simple:
 
-Keep the overall separation intact:
+- Agents orchestrate.
+- Sub-agents execute.
 
-- Agents orchestrate and never directly implement specialized logic if a sub-agent exists.
-- Sub-agents execute deterministically within a clearly declared scope and return structured outputs.
+That means an agent should not directly do specialized work when a matching sub-agent already exists.
 
-## Reference
+This template also expects agents to be:
 
-- `AGENTS.md` — Full layout, roles, and how the 3-layer architecture (strategic, execution, quality) is organized.
+- deterministic
+- traceable
+- explicit about assumptions
+- clear about why they chose a workflow
+
+## How to use it
+
+Copy the `.cursor` folder into your project:
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse git@github.com:Supparerk23/cursor-agent-template.git
+cd cursor-agent-template
+git sparse-checkout set .cursor
+cp -r .cursor ../your-project/
+```
+
+Then adjust the files for your repo:
+
+- edit `.cursor/agents/` to change orchestration behavior
+- edit `.cursor/subagents/` to change execution schemas or constraints
+- edit `AGENTS.md` to document your architecture
+
+## Good starting prompts
+
+Ask Cursor things like:
+
+```text
+Which agents are defined in this repository?
+List them and explain when each one should be used.
+```
+
+```text
+Use the backend-engineer agent from this repository.
+Plan a new API endpoint and call the relevant sub-agents.
+```
+
+```text
+Use the code-reviewer agent defined in this repository.
+Review this change and explain the findings with traceable evidence.
+```
+
+## Files to read first
+
+- `README.md` for the quick overview
+- `AGENTS.md` for the full system design
+- `.cursor/agents/` for agent behavior
+- `.cursor/subagents/` for execution contracts
 
