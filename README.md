@@ -101,3 +101,40 @@ Review this change and explain the findings with traceable evidence.
 - `.cursor/agents/` for agent behavior
 - `.cursor/subagents/` for execution contracts
 
+
+### Golden Prompt Pattern
+
+```
+Context:
+<code / requirement>
+
+Goal:
+<what you want>
+
+Constraints:
+- language:
+- performance:
+- style:
+
+Output:
+- code only / explanation / both
+```
+
+### Perfect Loop Claude with Cursor
+
+* Chat 1 → “Architect Claude”
+* Chat 2 → “Coder Claude”
+* Chat 3 → “Debugger Claude”
+
+```
+Claude → Generate
+↓
+You → Review (critical thinking)
+↓
+Claude → Refine
+↓
+Cursor → Apply
+↓
+Test → Feedback
+```
+
